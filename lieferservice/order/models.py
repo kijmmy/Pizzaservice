@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.urls import reverse
 
 # Create your models here.
 
@@ -38,6 +40,10 @@ class Order(models.Model):
     meals = models.ManyToManyField(Price, through='Topping')
     address = models.CharField(max_length=1023)
     state = models.CharField(max_length=1, choices=STATES, default='R')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+    def get_absolute_url(self):
+        return reverse('order:track_order', kwargs={'slug':self.pk})
 
     def __str__(self):
         return self.address
@@ -64,4 +70,4 @@ class Topping(models.Model):
     )
     meal=models.ForeignKey(Price, on_delete=models.CASCADE)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    topping=models.CharField(max_length=2, choices=TOPPINGS)
+    topping=models.CharField(max_length=2, choices=TOPPINGS, blank=True, null=True)
