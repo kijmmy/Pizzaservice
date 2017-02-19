@@ -1,0 +1,10 @@
+<p>{{object.address}}</p>
+<p>{{object.state}}</p>
+<ul>
+{% for meal in object.topping_set.all %}
+<li>
+<h6>{{meal.meal.meal.name}}</h6>
+<p>with {{meal.toppings}} for no less than {{ meal.price }}</p>
+</li>
+{% endfor %}
+</ul>

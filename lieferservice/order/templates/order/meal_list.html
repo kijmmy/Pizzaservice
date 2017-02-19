@@ -1,9 +1,12 @@
 <ul>
 {% for meal in object_list %}
 	<li>
-		<h2>{{meal.name}}</h2>
+		<h2>
+			<a href="{%url 'order:meal' slug=meal.pk%}">{{meal.name}}</a>
+		</h2>
 	</li>
 {% empty %}
 	<li>Sadly, our kitchen is out of diamid. Please come back again later!</li>
 {% endfor %}
 </ul>
+<a href="{% url 'order:order' %}">Order some Food</a>
