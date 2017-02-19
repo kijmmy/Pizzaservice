@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django import forms
 from django.views.generic.base import View
@@ -22,8 +22,11 @@ class ShowRecipie(PermissionRequiredMixin, DetailView):
     slug_field='pk'
     template_name='order/meal_recipie.html'
 
-class MyOrder(object):
+class MyOrder(LoginRequiredMixin, UserPassesTestMixin):
     model=Order
+
+    def test_func(self):
+        return self.request.user.is_active
 
     def get_queryset(self):
         return self.request.user.order_set
@@ -41,27 +44,40 @@ class ShowMeal(DetailView):
     model=Meal
     slug_field='pk'
 
+class ToppingForm(forms.ModelForm):
+    class Meta:
+        model=Topping
+        fields=('toppings',)
+
 class OrderMealForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(OrderMealForm, self).__init__(*args, **kwargs)
         for meal in Meal.objects.all():
             self.fields['price[%i]'%(meal.pk)] = forms.ModelChoiceField(queryset=meal.price_set.all(), label=meal.name+' size (price)', required=False)
-            self.fields['topping[%i]'%(meal.pk)]=forms.ChoiceField(choices=Topping.TOPPINGS, label="with topping: ", required=False)
+            self.fields['topping[%i]'%(meal.pk)]=ToppingForm(self.instance).fields['toppings']#forms.ChoiceField(choices=Topping.TOPPINGS, label="with topping: ", required=False)
+            self.fields['topping[%i]'%(meal.pk)].required=False
+
+    def clean(self):
+        for meal in Meal.objects.all():
+            if self.cleaned_data['price[%i]'%(meal.pk)] and len(self.cleaned_data['topping[%i]'%(meal.pk)]) > self.cleaned_data['price[%i]'%(meal.pk)].included:
+                self.add_error('topping[%i]'%(meal.pk), "Bei einer so kleinen größe gehen sich so viele Toppings leider nicht aus! :(")
+        return super(OrderMealForm, self).clean()
 
     def order_meals(self):
-        self.instance.save()
         for i in Meal.objects.all().values_list('pk'):
             price_pk = self.cleaned_data['price[%i]'%i]
             topping = self.cleaned_data['topping[%i]'%i]
-            if price_pk and topping:
-                Topping.objects.get_or_create(order=self.instance, meal=price_pk, topping=topping)
+            if price_pk:
+                if not self.instance.pk:
+                    self.instance.save()
+                Topping.objects.get_or_create(order=self.instance, meal=price_pk, toppings=topping)
 
     class Meta:
         model=Order
         fields=('address',)
 
-class OrderMeal(LoginRequiredMixin, CreateView):
+class OrderMeal(MyOrder, CreateView):
     form_class = OrderMealForm
     template_name='order/order_form.html'
 
@@ -74,14 +90,21 @@ class OrderMeal(LoginRequiredMixin, CreateView):
         #form.user = self.request.user
         form.instance.user = self.request.user
         form.order_meals()
+        if not form.instance.pk:
+            return False
         return super(OrderMeal, self).form_valid(form)
 
-class ListRecievedOrders(PermissionRequiredMixin, ListView):
+class DRYCooksOrder(PermissionRequiredMixin):
     model=Order
     permission_required='order.change_state'
     raise_exception=True
 
-class ChangeOrderState(PermissionRequiredMixin, UpdateView):
-    model=Order
+    def get_queryset(self):
+        return Order.objects.exclude(state='E').exclude(state='D')
+
+class ListRecievedOrders(DRYCooksOrder, ListView):
+    pass
+
+class ChangeOrderState(DRYCooksOrder, UpdateView):
     slug_field='pk'
     fields=('state',)

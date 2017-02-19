@@ -1,0 +1,14 @@
+{%for order in object_list%}
+<p>
+	<h3>{{order.address}}</h3>
+	<a href="{% url 'order:cook_changes' slug=order.pk%}">{{order.state}}</a>
+	<ul>
+	{%for connection in order.topping_set.all%}
+		<li>
+			<a href="{%url 'order:recipie' slug=connection.meal.meal.pk%}">{{connection.meal.meal.name}}</a>
+			<br>{{connection.topping}}
+		</li>
+	{%endfor%}
+	</ul>
+</p>
+{%endfor%}
