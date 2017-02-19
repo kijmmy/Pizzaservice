@@ -1,0 +1,20 @@
+  Um das Programm starten zu können müssen ein paar Vorbedingungen erfüllt werden.
+  1. Zunächst den Projektordner öffnen
+  		
+  		cd Pizzaservice/lieferservice
+
+  2. Dann benötigen wir eine Python Virtual Enviroment
+  		
+  		pyvenv venv
+
+  3. Desweiteren benötigen wir eine Shell z.B. fish
+  		
+  		. venv/bin/activate.fish
+
+  4. Dieses Programm arbeitet mit Django, deshalb muss dieses 	 installiert werden
+  		
+  		pip install django
+
+ Nun ist es möglich unser Programm zu nutzen.
+
+ 
