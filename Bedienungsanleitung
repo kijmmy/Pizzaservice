@@ -1,7 +1,7 @@
   Um das Programm starten zu können müssen ein paar Vorbedingungen erfüllt werden.
   1. Zunächst den Projektordner öffnen
   		
-  		cd Pizzaservice/lieferservice
+  		 z.B.   cd Pizzaservice/lieferservice
 
   2. Dann benötigen wir eine Python Virtual Enviroment
   		
@@ -15,6 +15,36 @@
   		
   		pip install django
 
- Nun ist es möglich unser Programm zu nutzen.
+ Nun ist es möglich unser Programm zu nutzen. .
 
+ Im Folgenden werden die verschiedenen Optionen des Programms aufgezeigt:
+
+  - Bestellung aufgeben:
+
+   Kunde: 
+ Username: grunske
+ Passwort: kunde123
+
+  ./manage.py runserver
  
+
+  - Bestellung einsehen:
+  Bevor die Bestellung eingesehen werden kann, muss zunächst sicher gestellt werden, dass der Benutzer ausgeloggt ist
+  
+  (127.0.0.1:8000/accounts/logout)
+ 
+ Unter 127.0.0.1:8000 mit den folgenden Daten einloggen
+
+ Username:gaston
+ Passwort: kochen007
+
+Danach ist auf 127.0.0.1:8000/answer der Status einsehbar 
+Oben ist die Adresse des Kunden unterhalb ist ein einzelner Buchstabe, der wiederrum ein Dropdown-Menue hat in dem der Koch den Status ändern kann 
+
+Falls Änderungen in der Datenbank erfolgen müssen/sollen, ist dies unter folgenden Daten möglich:
+
+ Username: root 
+ Passwort: admin123
+
+Zum Abschluss noch die Tests:
+      ./manage.py test
